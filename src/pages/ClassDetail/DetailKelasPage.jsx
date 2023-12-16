@@ -15,30 +15,49 @@ import locked from "../../assets/img/icon/bxs_lock.svg";
 import close_modal from "../../assets/img/icon/close-modal.svg";
 import arrow_buy from "../../assets/img/icon/carbon_next-filled.svg";
 import star from "../../assets/img/icon/ic_round-star.svg";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { getClasses } from "../../services/class/get-classByID";
+import ChapterContainer from "../../components/DetailClassComponents/ChapterContainer";
 
 const DetailKelasPage = () => {
   const [MateriBelajar, setMateriBelajar] = useState(false);
   const [TentangKelas, setTentangKelas] = useState(true);
   const [PaymentModal, setPaymentModal] = useState(false);
+  const [Detail, setDetail] = useState([]);
+  const [CourseChapter, setCourseChapter] = useState([]);
   const background_uiux = require("../../assets/img/image/uiux-person.jpg");
   const navigate = useNavigate();
-  const [Detail, setDetail] = useState([]);
   const { classId } = useParams();
 
+  const rupiahFormat = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+  });
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDetailClasses = async () => {
       try {
         const response = await getClasses(classId);
         setDetail(response.data.data);
-        console.log(response.data.data);
+        // console.log(response.data.data);
       } catch (error) {
         console.error("Error mengambil data Kelas:", error);
       }
     };
 
-    fetchData();
+    const fetchClassesChapters = async () => {
+      try {
+        const response = await getClasses(classId);
+        setCourseChapter(response.data.data.chapters);
+        // console.log(response.data.data.chapters);
+        // console.log(response.data.data.chapters[0].videos[0].title);
+      } catch (error) {
+        console.log(error, "error chapters");
+      }
+    };
+
+    fetchDetailClasses();
+    fetchClassesChapters();
   }, [classId]);
 
   const toogleTentangKelas = () => {
@@ -53,6 +72,12 @@ const DetailKelasPage = () => {
 
   const tooglePayment = () => {
     setPaymentModal((PaymentModal) => !PaymentModal);
+  };
+
+  const renderChapters = () => {
+    return CourseChapter.map((chapter, i) => {
+      return <ChapterContainer key={i} allChapter={chapter} />;
+    });
   };
 
   return (
@@ -126,7 +151,7 @@ const DetailKelasPage = () => {
             <div className="badge-level-section flex items-center gap-1">
               <img src={modul} alt="modul-course" />
               <span className="font-montserrat text-[0.75rem] leading-[0.9rem] font-bold hover:text-[#6148FF] cursor-pointer">
-                5 Modul
+                {Detail.modules} Modul
               </span>
             </div>
             <div className="badge-level-section flex items-center gap-1">
@@ -143,9 +168,6 @@ const DetailKelasPage = () => {
               <span>Join Grup Telegram</span>
               <img src={message} alt="message-icon" width="30" />
             </button>
-            {/* <div className="message-icon-section absolute transform -translate-y-1/2 right-[1em] top-1/2 cursor-pointer">
-              <img src={message} alt="message-icon" width="30" />
-            </div> */}
           </div>
         </div>
       </div>
@@ -187,8 +209,35 @@ const DetailKelasPage = () => {
           </div>
         </div>
 
-        <div className="right-class-section w-[40%] flex justify-center pr-[3rem]">
-          <div className="materi-container w-[100%] rounded-[1rem] px-[1.25rem] py-[1.25rem] flex flex-col -mt-[15rem] bg-[#FFFF] shadow-xl">
+        <div className="right-class-section w-[40%] flex justify-center pr-[3rem] h-full">
+          <div className="materi-container w-[100%] rounded-[1rem] px-[1.25rem] py-[1.25rem] flex flex-col -mt-[15rem] bg-[#FFFF] shadow-xl h-full">
+            <div className="top-text flex items-center gap-[1.5rem] w-full justify-between">
+              <div className="text-materi w-[50%]">
+                <span className="font-montserrat font-black text-[1.25rem] leading-[0.75rem]">
+                  Materi Belajar
+                </span>
+              </div>
+              <div className="progress-bar-section flex gap-2 w-[50%]">
+                <img src={progress_check} alt="progress-check" width="20" />
+                <div class="w-full bg-[#D9D9D9] rounded-full">
+                  <div
+                    class="bg-dark-blue text-xs text-blue-100 text-center p-0.5 rounded-full font-montserrat leading-[0.9rem] font-semibold"
+                    style={{ width: "50%" }}
+                  >
+                    {" "}
+                    50% complete
+                  </div>
+                </div>
+              </div>
+            </div>
+          {renderChapters()}
+          <Link to={`/pembayaran/${classId}`}>
+          <button className='bg-dark-blue my-[2rem] rounded-md flex items-center justify-center font-montserrat font-bold px-[2rem] py-[1rem] hover:text-white'>
+            Payment
+          </button>
+          </Link>
+          </div>
+          {/* <div className="materi-container w-[100%] rounded-[1rem] px-[1.25rem] py-[1.25rem] flex flex-col -mt-[15rem] bg-[#FFFF] shadow-xl">
             <div className="top-text flex items-center gap-[1.5rem] w-full justify-between">
               <div className="text-materi w-[50%]">
                 <span className="font-montserrat font-black text-[1.25rem] leading-[0.75rem]">
@@ -204,10 +253,27 @@ const DetailKelasPage = () => {
             </div>
             <div className="chapter-section flex justify-between items-center w-[95%] mt-2">
               <span className="chapter-title font-montserrat text-[#6148FF] font-black text-[1rem] leading-[2.25rem]">
-                Chapter 1 - Pendahuluan
-              </span>
-              <span className="chapter-time font-black font-montserrat leading-[2.25rem] text-[0.9rem] text-[#489CFF]">
-                60 menit
+                {CourseChapter.map((value) => {
+                  return (
+                    <div className="bg-slate-600 w-full flex flex-col justify-center items-center">
+                      <div className="bg-red-600 w-full px-[2rem] py-[1.2rem] rounded-md my-[1.2rem] flex justify-between items-center">
+                        <span className="font-montserrat text-white text-[1rem] font-black leading-[1.25rem] w-1/2">
+                          {value.title}
+                        </span>
+                        <span className="font-montserrat text-dark-blue font-semibold text-[0.9rem] w-1/3">60 menit</span>
+                      </div>
+                        <span className="text-white font-montserrat text-[0.85rem] font-semibold leading-[0.9rem]">
+                          {value.videos.map((courseVideo, index) => {
+                            return (
+                              <div className="flex flex-col gap-[2rem] my-[1rem]" key={index}>
+                               {index + 1} - {courseVideo.title}
+                              </div>
+                            );
+                          })}
+                        </span>
+                    </div>
+                  );
+                })}
               </span>
             </div>
             <div className="chapter-materi-section flex flex-col gap-2">
@@ -358,7 +424,7 @@ const DetailKelasPage = () => {
                               <div className="badge-level-section flex items-center gap-1">
                                 <img src={modul} alt="modul-course" />
                                 <span className="font-montserrat text-[0.75rem] leading-[0.9rem] font-bold hover:text-[#6148FF] cursor-pointer">
-                                  5 Modul
+                                  5 Moduls
                                 </span>
                               </div>
                               <div className="badge-level-section flex items-center gap-1">
@@ -369,30 +435,29 @@ const DetailKelasPage = () => {
                               </div>
                             </div>
                           </div>
-                          <button className="modal-buy-button w-[28%] rounded-[1rem] bg-[#489CFF] hover:bg-dark-blue flex justify-center items-center gap-4 px-[1rem] py-[.5rem] text-white mx-[1rem] my-[0.5rem] font-montserrat text-[0.75rem] leading-[0.9rem] font-black">
-                            <span>Beli</span>
-                            <span>Rp 349.000</span>
-                          </button>
+                          <Link to={`/pembayaran/${classId}`}>
+                            <button className="modal-buy-button w-[28%] rounded-[1rem] bg-[#489CFF] hover:bg-dark-blue flex justify-center items-center gap-4 px-[5rem] py-[.5rem] text-white mx-[1rem] my-[0.5rem] font-montserrat text-[0.75rem] leading-[0.9rem] font-black">
+                              <span>Beli</span>
+                              <span>{rupiahFormat.format(Detail.price)}</span>
+                            </button>
+                          </Link>
                         </div>
 
-                        <button
-                          className="buy-now-btn flex items-center justify-center mx-[5rem] rounded-[1.5rem] px-[.75rem] py-[1rem] bg-dark-blue gap-2 my-[1rem]"
-                          onClick={() => {
-                            navigate("/pembayaran");
-                          }}
-                        >
-                          <span className="font-montserrat font-black text-white text-[1rem] leading-[1.5rem]">
-                            Beli Sekarang
-                          </span>
-                          <img src={arrow_buy} alt="arrow-buy" width="20" />
-                        </button>
+                        <Link to={`/pembayaran/${classId}`}>
+                          <div className="buy-now-btn flex items-center justify-center mx-[5rem] rounded-[1.5rem] px-[.75rem] py-[1rem] bg-dark-blue gap-2 my-[1rem]">
+                            <span className="font-montserrat font-black text-white text-[1rem] leading-[1.5rem]">
+                              Beli Sekarang
+                            </span>
+                            <img src={arrow_buy} alt="arrow-buy" width="20" />
+                          </div>
+                        </Link>
                       </div>
                     </div>
                   </div>
                 </>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
       {/* End Desktop */}
@@ -455,7 +520,7 @@ const DetailKelasPage = () => {
             <div className="badge-level-section flex items-center gap-1">
               <img src={modul} alt="modul-course" style={{ width: "2.5vh" }} />
               <span className="font-montserrat text-[1.5vh] leading-[2vh] font-bold hover:text-[#6148FF] cursor-pointer">
-                5 Modul
+                {Detail.modules} Modul
               </span>
             </div>
             <div className="badge-level-section flex items-center gap-1">
@@ -695,7 +760,7 @@ const DetailKelasPage = () => {
                                 style={{ width: "2.5vh" }}
                               />
                               <span className="font-montserrat text-[1.5vh] leading-[2vh] font-bold hover:text-[#6148FF] cursor-pointer">
-                                5 Modul
+                                {Detail.modules} Modul
                               </span>
                             </div>
                             <div className="badge-level-section flex items-center gap-1">
@@ -710,17 +775,19 @@ const DetailKelasPage = () => {
                             </div>
                           </div>
                         </div>
+                        <Link to={`/pembayaran/${classId}`}>
                         <button className="modal-buy-button w-[20vh] rounded-[1rem] bg-[#489CFF] hover:bg-dark-blue flex justify-center items-center gap-4 px-[2vh] py-[1.25vh] mb-[1.5vh] text-white mx-[1rem] mt-[1vh] font-montserrat text-[1.5vh] leading-[0.9rem] font-black">
                           <span>Beli</span>
-                          <span>Rp 349.000</span>
+                          <span>{rupiahFormat.format(Detail.price)}</span>
                         </button>
+                        </Link>
                       </div>
 
                       <button
                         className="mobile-buy-now-btn flex items-center justify-center rounded-[1.5rem] py-[1rem] bg-dark-blue gap-2"
-                        onClick={() => {
-                          navigate("/pembayaran");
-                        }}
+                        // onClick={() => {
+                        //   navigate("/pembayaran");
+                        // }}
                       >
                         <span className="font-montserrat font-black text-white text-[2vh] leading-[2.5vh]">
                           Beli Sekarang

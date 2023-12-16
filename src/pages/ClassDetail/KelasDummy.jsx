@@ -4,9 +4,10 @@ import { getAllClass } from "../../services/class/get-allClasses";
 // import { getAllClass } from "../../services/class/get-allClasses";
 const KelasDummy = () => {
   const [Kelas, setKelas] = useState([]);
+  // const [CourseChapter, setCourseChapter] = useState([])
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchClasses = async () => {
       try {
         const response = await getAllClass();
         setKelas(response.data.data.classes);
@@ -16,7 +17,7 @@ const KelasDummy = () => {
       }
     };
 
-    fetchData();
+    fetchClasses();
   }, []);
 
   return (

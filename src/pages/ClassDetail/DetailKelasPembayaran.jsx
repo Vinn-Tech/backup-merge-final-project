@@ -1,7 +1,7 @@
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import NavbarComponents from "../../assets/components/NavbarComponents";
 import arrow_down from "../../assets/img/icon/arrow-down.svg";
 import arrow_up from "../../assets/img/icon/arrow-up.svg";
@@ -10,12 +10,20 @@ import visa from "../../assets/img/icon/visa logo.svg";
 import amex from "../../assets/img/icon/amex logo.svg";
 import paypal from "../../assets/img/icon/paypal logo.svg";
 import arrow_buy from "../../assets/img/icon/carbon_next-filled.svg";
+import { getClasses } from "../../services/class/get-classByID";
 
 const DetailKelasPembayaran = () => {
   const [BankAccordionOpen, setBankAccordionOpen] = useState(false);
   const [CreditAccordionOpen, setCreditAccordionOpen] = useState(false);
+  const [Detail, setDetail] = useState([]);
   const navigate = useNavigate();
   const background_uiux = require("../../assets/img/image/uiux-person.jpg");
+  const { classId } = useParams();
+
+  const rupiahFormat = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+  });
 
   const toogleBankAccordion = () => {
     setBankAccordionOpen((BankAccordionOpen) => !BankAccordionOpen);
@@ -24,6 +32,22 @@ const DetailKelasPembayaran = () => {
   const toogleCreditAccordion = () => {
     setCreditAccordionOpen((CreditAccordionOpen) => !CreditAccordionOpen);
   };
+
+  useEffect(() => {
+    const fetchDetailClasses = async () => {
+      try {
+        const response = await getClasses(classId);
+        setDetail(response.data.data);
+        console.log(response.data.data);
+      } catch (error) {
+        console.error("Error mengambil data Kelas:", error);
+      }
+    };
+
+    fetchDetailClasses();
+  }, [classId]);
+
+  const taxPrice = (Detail.price * 11) / 100;
 
   return (
     <div className="parents">
@@ -172,15 +196,27 @@ const DetailKelasPembayaran = () => {
               style={{ backgroundImage: `url(${background_uiux})` }}
             ></div>
             <span className="font-montserrat text-[0.9rem] font-black leading-[0.9rem] text-dark-blue mx-[1rem]">
-              UI/UX Design
+              {Detail.category_id === 1
+                ? "UI/UX Design"
+                : Detail.category_id === 2
+                ? "Product Management"
+                : Detail.category_id === 3
+                ? "Web Development"
+                : Detail.category_id === 4
+                ? "Android Development"
+                : Detail.category_id === 5
+                ? "IOS Development"
+                : Detail.category_id === 6
+                ? "Data Science"
+                : ""}
             </span>
 
             <div className="title-course-section flex flex-col gap-1 mx-[1rem]">
               <span className="course-title font-black font-montserrat text-[0.9rem] leading-[0.9rem] text-[#202244]">
-                Intro to Basic of User Introduction Design
+                {Detail.name}
               </span>
               <span className="author-section font-semibold text-[0.7rem] leading-[0.9rem] text-[#000] font-montserrat">
-                by Simon Doe
+                {Detail.author}
               </span>
             </div>
           </div>
@@ -191,7 +227,7 @@ const DetailKelasPembayaran = () => {
                 Harga
               </span>
               <span className="font-montserrat text-[0.9rem] leading-[1.5rem] font-black text-[#151515]">
-                Rp 349.000
+                {rupiahFormat.format(Detail.price)}
               </span>
             </div>
 
@@ -200,7 +236,7 @@ const DetailKelasPembayaran = () => {
                 PPN 11%
               </span>
               <span className="font-montserrat text-[0.9rem] leading-[1.5rem] font-black text-[#151515]">
-                Rp 38.390
+                {rupiahFormat.format(taxPrice)}
               </span>
             </div>
 
@@ -209,7 +245,7 @@ const DetailKelasPembayaran = () => {
                 Total Bayar
               </span>
               <span className="font-montserrat text-[0.9rem] leading-[1.5rem] font-black text-dark-blue">
-                Rp 387.390
+                {rupiahFormat.format(Detail.price + taxPrice)}
               </span>
             </div>
           </div>
@@ -230,7 +266,7 @@ const DetailKelasPembayaran = () => {
       {/* End Desktop */}
 
       {/* Mobile */}
-      <div className="mobile-container w-full h-full bg-[#EBF3FC] flex flex-col gap-[1vh] px-[3vh] py-[1.75vh]">
+      <div className="mobile-container laptop:hidden w-full h-full bg-[#EBF3FC] flex flex-col gap-[1vh] px-[3vh] py-[1.75vh]">
         <div className="back-arrow ml-[2vh]">
           <FontAwesomeIcon
             className="cursor-pointer"

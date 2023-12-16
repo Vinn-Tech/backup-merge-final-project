@@ -37,7 +37,7 @@ export const RouterPages = () => {
         <Route path="/filterResultKelas" element={<FilterResultKelas />} />
         <Route path="/filterResultTopik" element={<FilterResultTopik />} />
         <Route path="/detailKelas/:classId" element={<DetailKelasPage />} />
-        <Route path="/pembayaran" element={<DetailKelasPembayaran />} />
+        <Route path="/pembayaran/:classId" element={<DetailKelasPembayaran />} />
         <Route path="/pembayaranSukses" element={<PembayaranSukses />} />
         <Route path="/dummy" element={<KelasDummy/>}/>
         {/* <Route path="/detailKelas/:classId" element={<TestDetailKelas/>}/> */}
