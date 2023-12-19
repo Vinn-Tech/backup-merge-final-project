@@ -9,6 +9,11 @@ import undone_play_button from "../../assets/img/icon/dark-blue-play.svg";
 
 const ChapterContainer = (props) => {
 
+  // useEffect(() => {
+  //   console.log(props.allChapter)
+  // }, [])
+  
+
   return (
     <div className="parents my-[1.5rem]">
       <div className="title-chapter-section flex justify-between items-center">
@@ -31,7 +36,7 @@ const ChapterContainer = (props) => {
                   {value.title}
                 </span>
               </div>
-              <img src={value.iswatched ? done_play_button : undone_play_button} alt="done-play" width="20" />
+              <img src={value.is_watched ? done_play_button : undone_play_button} alt="done-play" width="20" />
             </div>
           </div>
         );

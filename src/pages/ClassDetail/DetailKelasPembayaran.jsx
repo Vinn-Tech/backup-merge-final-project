@@ -33,6 +33,22 @@ const DetailKelasPembayaran = () => {
     setCreditAccordionOpen((CreditAccordionOpen) => !CreditAccordionOpen);
   };
 
+  const calculateDeadline = () => {
+    const purchaseDate = new Date();
+    const deadlineDate = new Date(purchaseDate);
+    deadlineDate.setDate(purchaseDate.getDate() + 7);
+
+    const options = {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    };
+
+    const deadlineString = deadlineDate.toLocaleDateString("id-ID", options);
+
+    return deadlineString + " pukul 23.59";
+  };
+
   useEffect(() => {
     const fetchDetailClasses = async () => {
       try {
@@ -77,8 +93,8 @@ const DetailKelasPembayaran = () => {
           </span>
         </div>
         <div className="deadline-button-container flex items-center justify-center bg-[#FF0000] rounded-[0.75rem] w-[60%] py-[0.8rem]">
-          <span className="font-montserrat text-white text-[1rem] leading-[1.5rem] font-black">
-            Selesaikan Pembayaran sampai 10 Maret 2023 12:00
+          <span className="font-montserrat text-white text-[1rem] leading-[1.5rem] font-bold tracking-wide">
+            Selesaikan Pembayaran sampai {calculateDeadline()}
           </span>
         </div>
       </div>
