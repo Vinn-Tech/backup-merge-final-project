@@ -7,7 +7,7 @@ import badge from "../../assets/img/icon/badge-svg.svg";
 import modul from "../../assets/img/icon/clarity_book-line.svg";
 import time from "../../assets/img/icon/ri_time-fill.svg";
 import message from "../../assets/img/icon/gridicons_chat.svg";
-import play_video from "../../assets/img/icon/play video.svg";
+// import play_video from "../../assets/img/icon/play video.svg";
 import progress_check from "../../assets/img/icon/progress-check.svg";
 import done_play_button from "../../assets/img/icon/green-play.svg";
 import undone_play_button from "../../assets/img/icon/dark-blue-play.svg";
@@ -17,6 +17,7 @@ import arrow_buy from "../../assets/img/icon/carbon_next-filled.svg";
 import star from "../../assets/img/icon/ic_round-star.svg";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getClasses } from "../../services/class/get-classByID";
+import ReactPlayer from "react-player";
 // import ChapterContainer from "../../components/DetailClassComponents/ChapterContainer";
 
 const DetailKelasPage = () => {
@@ -25,10 +26,14 @@ const DetailKelasPage = () => {
   const [PaymentModal, setPaymentModal] = useState(false);
   const [Detail, setDetail] = useState([]);
   const [CourseChapter, setCourseChapter] = useState([]);
+  const [SelectedVideo, setSelectedVideo] = useState("");
+  const [FirstVideoPlay, setFirstVideoPlay] = useState("")
+  const [isVideoClicked, setisVideoClicked] = useState(false);
   const background_uiux = require("../../assets/img/image/uiux-person.jpg");
   const navigate = useNavigate();
   const { classId } = useParams();
-  let totalVideosSoFar = 0;
+  let totalVideosDesktop = 0;
+  let totalVideosMobile = 0;
 
   const rupiahFormat = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -40,7 +45,7 @@ const DetailKelasPage = () => {
       try {
         const response = await getClasses(classId);
         setDetail(response.data.data);
-        console.log(response.data.data,'classees');
+        // console.log(response.data.data, "classees");
       } catch (error) {
         console.error("Error mengambil data Kelas:", error);
       }
@@ -50,8 +55,9 @@ const DetailKelasPage = () => {
       try {
         const response = await getClasses(classId);
         setCourseChapter(response.data.data.chapters);
-        console.log(response.data.data.chapters, 'chapters');
-        // console.log(response.data.data.chapters[0].videos[0].title);
+        setFirstVideoPlay(response.data.data.chapters[0].videos[0].link)
+        // console.log(response.data.data.chapters, "chapters");
+        // console.log(response.data.data.chapters[0].videos[0].link, 'link');
       } catch (error) {
         console.log(error, "error chapters");
       }
@@ -59,7 +65,8 @@ const DetailKelasPage = () => {
 
     fetchDetailClasses();
     fetchClassesChapters();
-  }, [classId]);
+    // console.log(SelectedVideo);
+  }, [classId, SelectedVideo]);
 
   const toogleTentangKelas = () => {
     setTentangKelas(true);
@@ -90,7 +97,7 @@ const DetailKelasPage = () => {
       {/* Desktop */}
       {/* Hero Section */}
       <div className="hero-section hidden mobile:hidden laptop:flex laptop:flex-col gap-2 px-[5.5rem] py-[1rem] bg-[#EBF3FC] w-full">
-        <div className="top-text-section flex items-center mt-[1.5rem] gap-[1.25rem]">
+        <div className="top-text-section flex items-center mt-[1.5rem] gap-[1.25rem] cursor-pointer">
           <FontAwesomeIcon
             icon={faArrowLeft}
             size="xl"
@@ -133,7 +140,7 @@ const DetailKelasPage = () => {
                 style={{ color: "#F9CC00" }}
               />
               <span className="font-montserrat text-[#202244] font-bold leading-[0.9rem] text-[0.9rem]">
-                5.0
+                {Detail.rating}
               </span>
             </div>
           </div>
@@ -187,8 +194,28 @@ const DetailKelasPage = () => {
       {/* Class Detail Section */}
       <div className="class-detail-section hidden mobile:hidden laptop:flex w-full py-[2rem]">
         <div className="left-class-section w-[60%] flex flex-col gap-[1.5rem] mx-[6.5rem]">
-          <div className="video-play-container bg-[rgba(0,0,0,0.85)] w-full h-[25rem] rounded-[1.525rem] flex justify-center items-center">
-            <img src={play_video} alt="play-video" />
+          <div className="video-play-container w-full h-[25rem] rounded-[1.525rem]">
+            {/* <img src={play_video} alt="play-video" /> */}
+            <div className="player-wrapper h-full">
+              {!isVideoClicked ? (
+                <ReactPlayer
+                className='react-player'
+                url={FirstVideoPlay}
+                width="100%"
+                height="100%"
+                controls={true}
+
+                />
+              ) : (
+                <ReactPlayer
+                  className="react-player"
+                  url={SelectedVideo}
+                  width="100%"
+                  height="100%"
+                  controls={true}
+                />
+              )}
+            </div>
           </div>
           <div className="about-class-container flex flex-col gap-[1rem]">
             <span className="font-montserrat font-black text-[1.5rem] leading-[0.9rem]">
@@ -198,7 +225,6 @@ const DetailKelasPage = () => {
               {Detail.about}
             </span>
           </div>
-          x
           <div className="scope-class-container flex flex-col gap-[1rem]">
             <span className="font-montserrat font-black text-[1.5rem] leading-[0.9rem]">
               Kelas Ini Ditujukan Untuk
@@ -232,9 +258,9 @@ const DetailKelasPage = () => {
               </div>
               <div className="progress-bar-section flex gap-2 w-[50%]">
                 <img src={progress_check} alt="progress-check" width="20" />
-                <div class="w-full bg-[#D9D9D9] rounded-full">
+                <div className="w-full bg-[#D9D9D9] rounded-full">
                   <div
-                    class="bg-dark-blue text-xs text-blue-100 text-center p-0.5 rounded-full font-montserrat leading-[0.9rem] font-semibold"
+                    className="bg-dark-blue text-xs text-blue-100 text-center p-0.5 rounded-full font-montserrat leading-[0.9rem] font-semibold"
                     style={{ width: "50%" }}
                   >
                     {" "}
@@ -251,22 +277,22 @@ const DetailKelasPage = () => {
             </Link> */}
 
             {CourseChapter.map((value, chapterIndex) => {
-              const isPremiumClass = Detail.type_id === 2
+              const isPremiumClass = Detail.type_id === 2;
               const isChapterUnlocked = chapterIndex === 0 || !isPremiumClass;
 
               return (
                 <div className="chapter-parents my-[.5rem]" key={chapterIndex}>
                   <div className="title-chapter-section flex justify-between items-center">
                     <span className="font-montserrat font-black text-[0.9rem] text-dark-blue leading-[2.25rem]">
-                      {value.title}
+                      Chapter {value.no_chapter} - {value.title}
                     </span>
                     <span className="font-montserrat text-[#489CFF] font-black leading-[2.25rem] text-[0.9rem]">
                       60 Menit
                     </span>
                   </div>
                   {value.videos.map((vids, videoIndex) => {
-                    totalVideosSoFar++;
-                    const adjustedVideoIndex = totalVideosSoFar;
+                    totalVideosDesktop++;
+                    const adjustedVideoIndex = totalVideosDesktop;
 
                     return (
                       <div
@@ -292,7 +318,7 @@ const DetailKelasPage = () => {
                               alt="locked-button"
                               width="20"
                               onClick={tooglePayment}
-                              className='cursor-pointer'
+                              className="cursor-pointer"
                             />
                           ) : (
                             <img
@@ -309,7 +335,11 @@ const DetailKelasPage = () => {
                                   : "locked-button"
                               }
                               width="20"
-                              className='cursor-pointer'
+                              className="cursor-pointer"
+                              onClick={() => {
+                                setSelectedVideo(vids.link);
+                                setisVideoClicked(true);
+                              }}
                             />
                           )}
                         </div>
@@ -372,7 +402,7 @@ const DetailKelasPage = () => {
                                 style={{ color: "#F9CC00" }}
                               />
                               <span className="font-montserrat text-[#202244] font-bold leading-[0.9rem] text-[0.9rem]">
-                                5.0
+                                {Detail.rating}
                               </span>
                             </div>
                           </div>
@@ -435,7 +465,6 @@ const DetailKelasPage = () => {
               </>
             )}
           </div>
-         
         </div>
       </div>
       {/* End Desktop */}
@@ -443,7 +472,16 @@ const DetailKelasPage = () => {
       {/* Mobile */}
       <div className="mobile-section w-full h-screen bg-slate-600 block laptop:hidden">
         <div className="play-video-mobile-container bg-[rgba(0,0,0,0.85)] w-full h-[30%] flex justify-center items-center">
-          <img src={play_video} alt="play-video-course" />
+          {/* <img src={play_video} alt="play-video-course" /> */}
+          <div className="player-wrapper h-[90%] w-full">
+            <ReactPlayer
+              className="react-player"
+              url="https://youtu.be/DwTkyMJi890"
+              width="100%"
+              height="100%"
+              controls={true}
+            />
+          </div>
         </div>
 
         <div className="mobile-materi-section flex flex-col gap-[.9rem] rounded-[1.5rem] -mt-[2rem] h-full bg-[#FFFF] py-[2rem]">
@@ -466,7 +504,7 @@ const DetailKelasPage = () => {
             <div className="rating-star-section flex items-center">
               <img src={star} alt="rate-star" style={{ width: "2vh" }} />
               <span className="font-montserrat text-[#202244] font-bold leading-[1vh] text-[1.75vh]">
-                5.0
+                {Detail.rating}
               </span>
             </div>
           </div>
@@ -518,7 +556,7 @@ const DetailKelasPage = () => {
                     toogleTentangKelas();
                   }}
                 >
-                  <span className="font-montserrat text-[0.9rem] font-black leading-[2.25rem] text-[#FFFF]">
+                  <span className="font-montserrat text-[2vh] font-black leading-[5vh] text-[#FFFF]">
                     Tentang
                   </span>
                 </div>
@@ -528,18 +566,41 @@ const DetailKelasPage = () => {
                     toogleMateriBelajar();
                   }}
                 >
-                  <span className="font-montserrat text-[0.9rem] font-black leading-[2.25rem] text-[#489CFF]">
+                  <span className="font-montserrat text-[2vh] font-black leading-[5vh] text-[#489CFF]">
                     Materi Kelas
                   </span>
                 </div>
               </div>
-              <div className="about-class-container flex flex-col gap-[1rem]  ml-[1.35rem] mr-[1.5rem]">
-                <span className="font-montserrat font-black text-[1.5rem] leading-[0.9rem]">
-                  Tentang Kelas
-                </span>
-                <span className="font-normal text-[.8rem] leading-[1.5rem] font-montserrat text-[rgba(0,0,0,0.80)]">
-                  {Detail.about}
-                </span>
+              <div className="about-class-container flex flex-col gap-[1.25rem] mt-[1vh] ml-[1.35rem] mr-[1.5rem]">
+                <div className="flex flex-col gap-[1.5vh]">
+                  <span className="font-montserrat font-black text-[2.25vh] leading-[1.75vh]">
+                    Tentang Kelas
+                  </span>
+                  <span className="text-[1.7vh] leading-[2.5vh] font-montserrat text-[rgba(0,0,0,0.80)] text-justify">
+                    {Detail.about}
+                  </span>
+                </div>
+                <div className="scope-class-container flex flex-col gap-[1.5vh]">
+                  <span className="font-montserrat font-black text-[2.25vh] leading-[1.75vh]">
+                    Kelas Ini Ditujukan Untuk
+                  </span>
+                  <div className="flex flex-col gap-[1vh]">
+                    {Detail.goals && Detail.goals.length > 0 ? (
+                      Detail.goals.map((goal, index) => (
+                        <span
+                          key={index}
+                          className="font-montserrat text-[1.8vh] leading-[2vh] text-[rgba(0,0,0,0.80)]"
+                        >
+                          {goal}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="font-montserrat text-[1rem] leading-[0.9rem]">
+                        No goals available.
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             </>
           ) : (
@@ -551,7 +612,7 @@ const DetailKelasPage = () => {
                     toogleTentangKelas();
                   }}
                 >
-                  <span className="font-montserrat text-[0.9rem] font-black leading-[2.25rem] text-[#489CFF]">
+                  <span className="font-montserrat text-[2vh] font-black leading-[5vh] text-[#489CFF]">
                     Tentang
                   </span>
                 </div>
@@ -561,107 +622,85 @@ const DetailKelasPage = () => {
                     toogleMateriBelajar();
                   }}
                 >
-                  <span className="font-montserrat text-[0.9rem] font-black leading-[2.25rem] text-[#FFFF]">
+                  <span className="font-montserrat text-[2vh] font-black leading-[5vh] text-[#FFFF]">
                     Materi Kelas
                   </span>
                 </div>
               </div>
+
               <div className="chapter-section flex flex-col gap-2 ml-[1.35rem] mr-[1.5rem] mt-[1vh]">
                 <span className="font-montserrat font-black text-[2.25vh] leading-[2vh]">
                   Materi Belajar
                 </span>
-                <div className="chapter-title-section flex items-center justify-between mt-[1vh]">
-                  <span className="font-montserrat font-extrabold text-dark-blue text-[1.4vh] leading-[1.25vh]">
-                    Chapter 1 - Pendahuluan
-                  </span>
-                  <span className="font-montserrat text-[#489CFF] text-[1.4vh] font-extrabold leading-[1.25vh]">
-                    60 Menit
-                  </span>
-                </div>
-              </div>
 
-              <div className="chapter-card-section flex flex-col items-center gap-1 ml-[1.35rem] mr-[1.5rem]">
-                <div className="card-index-section flex justify-between w-full items-center border-b-2 border-[#EBF3FC] py-[0.25rem]">
-                  <div className="number-title-section flex items-center gap-[1.25vh]">
-                    <span className="index-number-section bg-[#EBF3FC] rounded-[100%] px-[1rem] py-[0.65rem] flex items-center font-montserrat text-[#202244] text-[1.5vh] font-bold leading-[1.25vh] hover:bg-dark-blue hover:text-white">
-                      1
-                    </span>
-                    <span className="course-title-section text-[rgba(0,0,0,0.80)] text-[1.5vh] font-semibold leading-[1.25rem] font-montserrat">
-                      Tujuan Mengikuti Kelas Design System
-                    </span>
-                  </div>
-                  <img
-                    className="play-btn"
-                    src={done_play_button}
-                    alt="success-play-button"
-                    style={{ width: "2.25vh" }}
-                  />
-                </div>
+                {CourseChapter.map((value, chapterIndex) => {
+                  const isPremiumClass = Detail.type_id === 2;
+                  const isChapterUnlocked =
+                    chapterIndex === 0 || !isPremiumClass;
+                  return (
+                    <div
+                      className="mobile-chapter-parents mt-[1vh]"
+                      key={chapterIndex}
+                    >
+                      <div className="chapter-title-section flex items-center justify-between">
+                        <span className="font-montserrat font-extrabold text-dark-blue text-[1.7vh] leading-[1.25vh]">
+                          {value.title}
+                        </span>
+                        <span className="font-montserrat text-[#489CFF] text-[1.7vh] font-extrabold leading-[1.25vh]">
+                          60 Menit
+                        </span>
+                      </div>
 
-                <div className="card-index-section flex justify-between w-full items-center border-b-2 border-[#EBF3FC] py-[0.25rem]">
-                  <div className="number-title-section flex items-center gap-[1.25vh]">
-                    <span className="index-number-section bg-[#EBF3FC] rounded-[100%] px-[1rem] py-[0.65rem] flex items-center font-montserrat text-[#202244] text-[1.5vh] font-bold leading-[1.25vh] hover:bg-dark-blue hover:text-white">
-                      2
-                    </span>
-                    <span className="course-title-section text-[rgba(0,0,0,0.80)] text-[1.5vh] font-semibold leading-[1.25rem] font-montserrat">
-                      Pengenalan Design System
-                    </span>
-                  </div>
-                  <img
-                    className="play-btn"
-                    src={done_play_button}
-                    alt="success-play-button"
-                    style={{ width: "2.25vh" }}
-                  />
-                </div>
-
-                <div className="card-index-section flex justify-between w-full items-center border-b-2 border-[#EBF3FC] py-[0.25rem]">
-                  <div className="number-title-section flex items-center gap-[1.25vh]">
-                    <span className="index-number-section bg-[#EBF3FC] rounded-[100%] px-[1rem] py-[0.65rem] flex items-center font-montserrat text-[#202244] text-[1.5vh] font-bold leading-[1.25vh] hover:bg-dark-blue hover:text-white">
-                      3
-                    </span>
-                    <span className="course-title-section text-[rgba(0,0,0,0.80)] text-[1.5vh] font-semibold leading-[1.25rem] font-montserrat">
-                      Contoh Dalam Membangun Design System
-                    </span>
-                  </div>
-                  <img
-                    className="play-btn"
-                    src={undone_play_button}
-                    alt="success-play-button"
-                    style={{ width: "2.25vh" }}
-                  />
-                </div>
-              </div>
-
-              <div className="chapter-section flex flex-col gap-2 ml-[1.35rem] mr-[1.5rem] mt-[1vh]">
-                <div className="chapter-title-section flex items-center justify-between">
-                  <span className="font-montserrat font-extrabold text-dark-blue text-[1.4vh] leading-[1.25vh]">
-                    Chapter 2 - Memulai Desain
-                  </span>
-                  <span className="font-montserrat text-[#489CFF] text-[1.4vh] font-extrabold leading-[1.25vh]">
-                    120 Menit
-                  </span>
-                </div>
-              </div>
-
-              <div className="chapter-card-section flex flex-col items-center gap-1 ml-[1.35rem] mr-[1.5rem]">
-                <div className="card-index-section flex justify-between w-full items-center border-b-2 border-[#EBF3FC] py-[0.25rem]">
-                  <div className="number-title-section flex items-center gap-[1.25vh]">
-                    <span className="index-number-section bg-[#EBF3FC] rounded-[100%] px-[1rem] py-[0.65rem] flex items-center font-montserrat text-[#202244] text-[1.5vh] font-bold leading-[1.25vh] hover:bg-dark-blue hover:text-white">
-                      4
-                    </span>
-                    <span className="course-title-section text-[rgba(0,0,0,0.80)] text-[1.5vh] font-semibold leading-[1.25rem] font-montserrat">
-                      Color Pallete
-                    </span>
-                  </div>
-                  <img
-                    className="play-btn"
-                    src={locked}
-                    alt="class-locked-button"
-                    style={{ width: "2.25vh" }}
-                    onClick={tooglePayment}
-                  />
-                </div>
+                      {value.videos.map((vids, videoIndex) => {
+                        totalVideosMobile++;
+                        const adjustedVideoIndex = totalVideosMobile;
+                        return (
+                          <div
+                            className="course-chapters-container border-b-[0.25vh] border-[#EBF3FC] py-[.75vh] mt-[1vh]"
+                            key={videoIndex}
+                          >
+                            <div className="chapter-card-section flex items-center justify-between w-[95%]">
+                              <div className="card-number-title-section flex items-center gap-[0.75rem]">
+                                <span className="rounded-[100%] text-[2vh] px-[2.1vh] py-[1.25vh] hover:bg-dark-blue hover:text-white cursor-pointer bg-[#EBF3FC]">
+                                  {adjustedVideoIndex}
+                                </span>
+                                <span className="course-title-section text-[rgba(0,0,0,0.80)] text-[1.75vh] font-semibold leading-[1.25rem] font-montserrat">
+                                  {vids.title}
+                                </span>
+                              </div>
+                              {!isChapterUnlocked && isPremiumClass ? (
+                                <img
+                                  src={locked}
+                                  alt="locked-button"
+                                  onClick={tooglePayment}
+                                  style={{ width: "2.5vh" }}
+                                  className="cursor-pointer"
+                                />
+                              ) : (
+                                <img
+                                  src={
+                                    isChapterUnlocked
+                                      ? vids.is_watched
+                                        ? done_play_button
+                                        : undone_play_button
+                                      : locked
+                                  }
+                                  alt={
+                                    isChapterUnlocked
+                                      ? "play-button"
+                                      : "locked-button"
+                                  }
+                                  style={{ width: "2.5vh" }}
+                                  className="cursor-pointer"
+                                />
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
               </div>
 
               {PaymentModal && (
@@ -694,10 +733,22 @@ const DetailKelasPage = () => {
                             backgroundSize: "cover",
                           }}
                         ></div>
-                        <div className="modal-category-rate-section flex flex-col gap-[1vh]">
-                          <div className="mobile-course-category flex justify-between items-center mx-[1rem] mt-[0.8rem]">
-                            <span className="font-montserrat text-dark-blue text-[2vh] font-black leading-[0.9rem]">
-                              UI/UX Design
+                        <div className="modal-category-rate-section flex flex-col gap-[.75vh]">
+                          <div className="mobile-course-category flex justify-between items-center mx-[1rem] mt-[.75vh]">
+                            <span className="font-montserrat text-dark-blue text-[2.2vh] font-black leading-[0.9rem]">
+                              {Detail.category_id === 1
+                                ? "UI/UX Design"
+                                : Detail.category_id === 2
+                                ? "Product Management"
+                                : Detail.category_id === 3
+                                ? "Web Development"
+                                : Detail.category_id === 4
+                                ? "Android Development"
+                                : Detail.category_id === 5
+                                ? "IOS Development"
+                                : Detail.category_id === 6
+                                ? "Data Science"
+                                : ""}
                             </span>
                             <div className="rating-star-section flex gap-1 items-center">
                               <FontAwesomeIcon
@@ -706,17 +757,17 @@ const DetailKelasPage = () => {
                                 style={{ color: "#F9CC00" }}
                               />
                               <span className="font-montserrat text-[#202244] font-bold leading-[0.9rem] text-[1.8vh]">
-                                5.0
+                                {Detail.rating}
                               </span>
                             </div>
                           </div>
 
-                          <div className="mobile-title-course-section flex flex-col mx-[1rem]">
-                            <span className="course-title font-black font-montserrat text-[1.75vh] leading-[2vh] text-[#202244]">
-                              Intro to Basic of User Introduction Design
+                          <div className="mobile-title-course-section flex flex-col mx-[1rem] gap-[.5vh]">
+                            <span className="course-title font-black font-montserrat text-[2.2vh] leading-[2vh] text-[#202244]">
+                              {Detail.name}
                             </span>
-                            <span className="author-section font-bold text-[1.5vh] leading-[2vh] text-[#000] font-montserrat">
-                              by Simon Doe
+                            <span className="author-section font-bold text-[1.8vh] leading-[2vh] text-[#000] font-montserrat">
+                              {Detail.author}
                             </span>
                           </div>
 
@@ -728,7 +779,13 @@ const DetailKelasPage = () => {
                                 style={{ width: "2.5vh" }}
                               />
                               <span className="font-montserrat text-[1.5vh] leading-[2vh] font-bold hover:text-[#6148FF] cursor-pointer">
-                                Beginner Level
+                                {Detail.level_id === 1
+                                  ? "Beginner Level"
+                                  : Detail.level_id === 2
+                                  ? "Intermediate Level"
+                                  : Detail.level_id === 3
+                                  ? "Advanced Level"
+                                  : ""}
                               </span>
                             </div>
                             <div className="badge-level-section flex items-center gap-1">
@@ -761,17 +818,14 @@ const DetailKelasPage = () => {
                         </Link>
                       </div>
 
-                      <button
-                        className="mobile-buy-now-btn flex items-center justify-center rounded-[1.5rem] py-[1rem] bg-dark-blue gap-2"
-                        // onClick={() => {
-                        //   navigate("/pembayaran");
-                        // }}
-                      >
-                        <span className="font-montserrat font-black text-white text-[2vh] leading-[2.5vh]">
-                          Beli Sekarang
-                        </span>
-                        <img src={arrow_buy} alt="arrow-buy" width="20" />
-                      </button>
+                      <Link to={`/pembayaran/${classId}`}>
+                        <button className="mobile-buy-now-btn flex items-center justify-center rounded-[1.5rem] py-[1rem] w-full bg-dark-blue gap-2">
+                          <span className="font-montserrat font-black text-white text-[2vh] leading-[2.5vh]">
+                            Beli Sekarang
+                          </span>
+                          <img src={arrow_buy} alt="arrow-buy" width="20" />
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
