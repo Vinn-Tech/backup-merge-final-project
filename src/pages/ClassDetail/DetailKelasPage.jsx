@@ -1,8 +1,6 @@
-// import { faIdBadge } from "@fortawesome/free-regular-svg-icons";
 import { faArrowLeft, faStar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
-// import NavbarComponents from "../../assets/components/NavbarComponents";
 import badge from "../../assets/img/icon/badge-svg.svg";
 import modul from "../../assets/img/icon/clarity_book-line.svg";
 import time from "../../assets/img/icon/ri_time-fill.svg";
@@ -19,7 +17,6 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { getClasses } from "../../services/class/get-classByID";
 import ReactPlayer from "react-player";
 import { NavbarKelas } from "../../components/NavbarKelas";
-// import ChapterContainer from "../../components/DetailClassComponents/ChapterContainer";
 
 const DetailKelasPage = () => {
   const [MateriBelajar, setMateriBelajar] = useState(false);
@@ -28,9 +25,9 @@ const DetailKelasPage = () => {
   const [Detail, setDetail] = useState([]);
   const [CourseChapter, setCourseChapter] = useState([]);
   const [SelectedVideo, setSelectedVideo] = useState("");
-  const [FirstVideoPlay, setFirstVideoPlay] = useState("")
+  const [FirstVideoPlay, setFirstVideoPlay] = useState("");
   const [isVideoClicked, setisVideoClicked] = useState(false);
-  const background_uiux = require("../../assets/img/image/uiux-person.jpg");
+  // const background_uiux = require("../../assets/img/image/uiux-person.jpg");
   const navigate = useNavigate();
   const { classId } = useParams();
   let totalVideosDesktop = 0;
@@ -46,7 +43,7 @@ const DetailKelasPage = () => {
       try {
         const response = await getClasses(classId);
         setDetail(response.data.data);
-        // console.log(response.data.data, "classees");
+        console.log(response.data.data, "classees");
       } catch (error) {
         console.error("Error mengambil data Kelas:", error);
       }
@@ -56,7 +53,7 @@ const DetailKelasPage = () => {
       try {
         const response = await getClasses(classId);
         setCourseChapter(response.data.data.chapters);
-        setFirstVideoPlay(response.data.data.chapters[0].videos[0].link)
+        setFirstVideoPlay(response.data.data.chapters[0].videos[0].link);
         // console.log(response.data.data.chapters, "chapters");
         // console.log(response.data.data.chapters[0].videos[0].link, 'link');
       } catch (error) {
@@ -82,12 +79,6 @@ const DetailKelasPage = () => {
   const tooglePayment = () => {
     setPaymentModal((PaymentModal) => !PaymentModal);
   };
-
-  // const renderChapters = () => {
-  //   return CourseChapter.map((chapter, i) => {
-  //     return <ChapterContainer key={i} allChapter={chapter} />;
-  //   });
-  // };
 
   return (
     <div className="parents">
@@ -200,12 +191,11 @@ const DetailKelasPage = () => {
             <div className="player-wrapper h-full">
               {!isVideoClicked ? (
                 <ReactPlayer
-                className='react-player'
-                url={FirstVideoPlay}
-                width="100%"
-                height="100%"
-                controls={true}
-
+                  className="react-player"
+                  url={FirstVideoPlay}
+                  width="100%"
+                  height="100%"
+                  controls={true}
                 />
               ) : (
                 <ReactPlayer
@@ -376,7 +366,7 @@ const DetailKelasPage = () => {
                         <div
                           className="rounded-t-[1rem] bg-cover bg-no-repeat bg-center w-full h-[40%]"
                           style={{
-                            backgroundImage: `url(${background_uiux})`,
+                            backgroundImage: `url(${Detail.image_url})`,
                           }}
                         ></div>
                         <div className="modal-category-rate-section flex flex-col gap-1">
@@ -475,13 +465,23 @@ const DetailKelasPage = () => {
         <div className="play-video-mobile-container bg-[rgba(0,0,0,0.85)] w-full h-[30%] flex justify-center items-center">
           {/* <img src={play_video} alt="play-video-course" /> */}
           <div className="player-wrapper h-[90%] w-full">
-            <ReactPlayer
-              className="react-player"
-              url="https://youtu.be/DwTkyMJi890"
-              width="100%"
-              height="100%"
-              controls={true}
-            />
+            {!isVideoClicked ? (
+              <ReactPlayer
+                className="react-player"
+                url={FirstVideoPlay}
+                width="100%"
+                height="100%"
+                controls={true}
+              />
+            ) : (
+              <ReactPlayer
+                className="react-player"
+                url={SelectedVideo}
+                width="100%"
+                height="100%"
+                controls={true}
+              />
+            )}
           </div>
         </div>
 
@@ -562,7 +562,7 @@ const DetailKelasPage = () => {
                   </span>
                 </div>
                 <div
-                  className="materi-section flex justify-center items-center bg-sky-100 w-[50%] py-[.5rem]"
+                  className="materi-section flex justify-center items-center bg-[#EBF3FC] w-[50%] py-[.5rem]"
                   onClick={() => {
                     toogleMateriBelajar();
                   }}
@@ -608,7 +608,7 @@ const DetailKelasPage = () => {
             <>
               <div className="select-about-materi-section flex items-center w-full mt-2 cursor-pointer">
                 <div
-                  className="about-section flex justify-center items-center bg-sky-100 w-[50%] py-[.5rem]"
+                  className="about-section flex justify-center items-center bg-[#EBF3FC] w-[50%] py-[.5rem]"
                   onClick={() => {
                     toogleTentangKelas();
                   }}
@@ -693,6 +693,10 @@ const DetailKelasPage = () => {
                                   }
                                   style={{ width: "2.5vh" }}
                                   className="cursor-pointer"
+                                  onClick={() => {
+                                    setSelectedVideo(vids.link);
+                                    setisVideoClicked(true);
+                                  }}
                                 />
                               )}
                             </div>
@@ -730,7 +734,7 @@ const DetailKelasPage = () => {
                         <div
                           className="rounded-t-[1rem] bg-cover bg-no-repeat bg-center w-full h-[25vh]"
                           style={{
-                            backgroundImage: `url(${background_uiux})`,
+                            backgroundImage: `url(${Detail.image_url})`,
                             backgroundSize: "cover",
                           }}
                         ></div>

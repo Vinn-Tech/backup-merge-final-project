@@ -30,7 +30,7 @@ const DetailKelasPembayaran = () => {
   const [SelectedBank, setSelectedBank] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("");
   const navigate = useNavigate();
-  const background_uiux = require("../../assets/img/image/uiux-person.jpg");
+  // const background_uiux = require("../../assets/img/image/uiux-person.jpg");
   const { classId } = useParams();
 
   const rupiahFormat = new Intl.NumberFormat("id-ID", {
@@ -354,7 +354,7 @@ const DetailKelasPembayaran = () => {
           <div className="course-container flex flex-col gap-2 rounded-[1rem] h-[60%] shadow-lg">
             <div
               className="img-course-container rounded-t-[1rem] bg-cover bg-center w-full h-[50%]"
-              style={{ backgroundImage: `url(${background_uiux})` }}
+              style={{ backgroundImage: `url(${Detail.image_url})` }}
             ></div>
             <span className="font-montserrat text-[0.9rem] font-black leading-[0.9rem] text-dark-blue mx-[1rem]">
               {Detail.category_id === 1
@@ -446,7 +446,7 @@ const DetailKelasPembayaran = () => {
           <div className="course-box-container bg-[#FFFF] shadow-lg rounded-[1rem] flex flex-col gap-[1vh] h-[23vh]">
             <div
               className="img-course-container rounded-t-[1rem] bg-cover bg-center w-full h-[12vh]"
-              style={{ backgroundImage: `url(${background_uiux})` }}
+              style={{ backgroundImage: `url(${Detail.image_url})` }}
             ></div>
             <span className="font-montserrat text-[2vh] font-black leading-[1.5vh] text-dark-blue mx-[1rem]">
               UI/UX Design
