@@ -26,7 +26,7 @@ export const NavbarKelas = () => {
   };
   return (
     
-      <div className="hidden laptop:flex flex-row bg-[#6148FF] p-3 justify-between ">
+      <div className="hidden laptop:flex flex-row bg-[#6148FF] p-3 justify-between w-full">
         <div className="flex  items-center text-white ml-[5rem]">
           <img src={logo} alt=" " className="w-12 h-12" />
           <h1 className=" text-lg mr-20">RealSkills</h1>

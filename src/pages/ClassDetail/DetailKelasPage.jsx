@@ -2,7 +2,7 @@
 import { faArrowLeft, faStar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
-import NavbarComponents from "../../assets/components/NavbarComponents";
+// import NavbarComponents from "../../assets/components/NavbarComponents";
 import badge from "../../assets/img/icon/badge-svg.svg";
 import modul from "../../assets/img/icon/clarity_book-line.svg";
 import time from "../../assets/img/icon/ri_time-fill.svg";
@@ -18,6 +18,7 @@ import star from "../../assets/img/icon/ic_round-star.svg";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getClasses } from "../../services/class/get-classByID";
 import ReactPlayer from "react-player";
+import { NavbarKelas } from "../../components/NavbarKelas";
 // import ChapterContainer from "../../components/DetailClassComponents/ChapterContainer";
 
 const DetailKelasPage = () => {
@@ -91,7 +92,7 @@ const DetailKelasPage = () => {
   return (
     <div className="parents">
       <div className="nav-component-section hidden laptop:flex">
-        <NavbarComponents />
+        <NavbarKelas />
       </div>
 
       {/* Desktop */}

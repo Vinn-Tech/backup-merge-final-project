@@ -9,14 +9,26 @@ import mastercard from "../../assets/img/icon/mastercard logo.svg";
 import visa from "../../assets/img/icon/visa logo.svg";
 import amex from "../../assets/img/icon/amex logo.svg";
 import paypal from "../../assets/img/icon/paypal logo.svg";
+import bri_logo from "../../assets/img/icon/logo-bri.png";
+import bni_logo from "../../assets/img/icon/logo-bni.png";
+import bca_logo from "../../assets/img/icon/logo-bca.png";
 import arrow_buy from "../../assets/img/icon/carbon_next-filled.svg";
 import { getClasses } from "../../services/class/get-classByID";
 import { Option, Select } from "@material-tailwind/react";
+import { postPayments } from "../../services/payments/create-payments";
 
 const DetailKelasPembayaran = () => {
   const [BankAccordionOpen, setBankAccordionOpen] = useState(false);
   const [CreditAccordionOpen, setCreditAccordionOpen] = useState(false);
   const [Detail, setDetail] = useState([]);
+  const [FormInputNominal, setFormInputNominal] = useState({
+    nominal: 0,
+  });
+  const [isNominalValid, setIsNominalValid] = useState(true);
+  const [isNominalLengthValid, setIsNominalLengthValid] = useState(true);
+  const [isNominalToMuch, setIsNominalToMuch] = useState(true);
+  const [SelectedBank, setSelectedBank] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("");
   const navigate = useNavigate();
   const background_uiux = require("../../assets/img/image/uiux-person.jpg");
   const { classId } = useParams();
@@ -52,12 +64,53 @@ const DetailKelasPembayaran = () => {
     return deadlineString + " pukul 23.59";
   };
 
+  const handleInputNominal = (e) => {
+    const { value } = e.target;
+    const nominalValue = parseInt(value.replace(/\D/g, ""), 10);
+    setFormInputNominal({
+      ...FormInputNominal,
+      nominal: nominalValue,
+    });
+    const totalAmount = Detail.price + taxPrice;
+    const isInputValid = Number(value) === totalAmount;
+    const isInputToMuch = Number(value) >= totalAmount;
+    const isInputLengthValid = value.length > 0;
+
+    setIsNominalValid(isInputValid);
+    setIsNominalToMuch(isInputToMuch);
+    setIsNominalLengthValid(isInputLengthValid);
+  };
+
+  const resetNominal = () => {
+    setFormInputNominal({
+      ...FormInputNominal,
+      nominal: 0,
+    });
+  };
+
+  const handleSelectedBank = (value) => {
+    setSelectedBank(value);
+  };
+
+  const handlePayments = async () => {
+    const formPayments = {
+      payment_method: paymentMethod,
+      class_id: classId,
+    };
+    try {
+      const response = await postPayments(formPayments);
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     const fetchDetailClasses = async () => {
       try {
         const response = await getClasses(classId);
         setDetail(response.data.data);
-        console.log(response.data.data);
+        // console.log(paymentMethod)
       } catch (error) {
         console.error("Error mengambil data Kelas:", error);
       }
@@ -67,6 +120,7 @@ const DetailKelasPembayaran = () => {
   }, [classId]);
 
   const taxPrice = (Detail.price * 11) / 100;
+  // const isNominalValid = (FormInputNominal.nominal >= Detail.price + taxPrice);
 
   return (
     <div className="parents">
@@ -108,7 +162,11 @@ const DetailKelasPembayaran = () => {
         <div className="left-payment-section flex flex-col gap-2 w-[40%] h-[25rem]">
           <div
             className="bank-transfer-container flex items-center justify-between bg-[#3C3C3C] rounded-[0.5rem] px-[1rem] py-[.75rem]"
-            onClick={toogleBankAccordion}
+            onClick={() => {
+              toogleBankAccordion();
+              setSelectedBank(null);
+              resetNominal();
+            }}
           >
             <span className="font-montserrat font-semibold text-white text-[0.8rem] leading-[1.25rem]">
               Bank Transfer
@@ -121,14 +179,73 @@ const DetailKelasPembayaran = () => {
           </div>
 
           {BankAccordionOpen && (
-            <div className="modal-bank-transfer-container flex flex-col justify-center items-center gap-[1rem] w-full py-[1.5rem] bg-[#FFF] shadow-lg rounded-[1rem] -mt-2">
-              <div className="select-container w-72 h-50">
-                <Select label="Select Version">
-                  <Option>BRI</Option>
-                  <Option>BNI</Option>
-                  <Option>BCA</Option>
+            <div className="modal-bank-transfer-container flex flex-col justify-center items-center gap-[1rem] w-full py-[2rem] bg-[#FFF] shadow-lg rounded-[1rem] -mt-2">
+              <div className="bank-icon-container flex items-center justify-center gap-[1rem]">
+                <img src={bri_logo} alt="bri_logo icon" width="40" />
+                <img src={bni_logo} alt="bni_logo icon" width="40" />
+                <img src={bca_logo} alt="bca_logo icon" width="40" />
+              </div>
+              <div className="select-container w-1/2 font-poppins font-semibold">
+                <Select
+                  size="md"
+                  color="blue"
+                  label="Pilih Bank"
+                  className="font-poppins font-semibold"
+                  onChange={(value) => {
+                    handleSelectedBank(value);
+                  }}
+                >
+                  <Option value="BRI">BRI</Option>
+                  <Option value="BNI">BNI</Option>
+                  <Option value="BCA">BCA</Option>
                 </Select>
               </div>
+              <div className="flex items-center w-[50%] flex-col gap-[1rem]">
+                <div className="card-number-container flex flex-col gap-2 w-[100%]">
+                  <span className="font-poppins font-semibold text-[0.9] leading-[1.25rem]">
+                    Nominal
+                  </span>
+                  <div className="card-number-input w-[100%] border-b-2 border-[#D0D0D0] pb-[.2rem] px-1">
+                    <input
+                      placeholder="Masukkan Nominal"
+                      className="outline-none font-poppins text-[0.9rem] leading-[1.25rem] w-full"
+                      type="number"
+                      // value={FormInputNominal.nominal}
+                      onChange={(e) => handleInputNominal(e)}
+                      disabled={!SelectedBank}
+                      required
+                    />
+                  </div>
+                  {FormInputNominal.nominal > 0 &&
+                    !isNominalValid &&
+                    isNominalLengthValid &&
+                    !isNominalToMuch && (
+                      <div className="font-poppins text-xs text-red-600 mt-2">
+                        Nominal kurang dari harga kelass
+                      </div>
+                    )}
+                  {FormInputNominal.nominal > 0 &&
+                    !isNominalValid &&
+                    isNominalLengthValid &&
+                    isNominalToMuch && (
+                      <div className="font-poppins text-xs text-dark-blue mt-2">
+                        Nominal melebihi dari harga kelass
+                      </div>
+                    )}
+                </div>
+              </div>
+              <button
+                className="bank-transfer-btn flex justify-center items-center py-[1rem] rounded-[1.5rem] text-white bg-[#3C3C3C] w-[50%] hover:bg-black disabled:bg-gray-300"
+                onClick={() => {
+                  handlePayments();
+                  setPaymentMethod("Bank Transfer");
+                }}
+                disabled={FormInputNominal.nominal <= 0 || !isNominalValid || !isNominalLengthValid }
+              >
+                <span className="font-poppins text-[1rem] font-bold leading-[0.9rem]">
+                  Kirim
+                </span>
+              </button>
             </div>
           )}
 
@@ -146,71 +263,84 @@ const DetailKelasPembayaran = () => {
             />
           </div>
           {CreditAccordionOpen && (
-            <div className="modal-credit-container flex flex-col justify-center items-center gap-[1rem] w-full py-[1.5rem] bg-[#FFFF] shadow-lg rounded-[1rem] -mt-2">
-              <div className="credit-card-img-container flex items-center justify-center gap-[0.75rem]">
-                <img src={mastercard} alt="mastercard icon" width="35" />
-                <img src={visa} alt="visa icon" width="35" />
-                <img src={amex} alt="amex icon" width="35" />
-                <img src={paypal} alt="paypal icon" width="35" />
-              </div>
-
-              <div className="form-input-credit flex flex-col items-center gap-[1.5rem] w-[60%]">
-                <div className="card-number-container flex flex-col gap-2 w-[100%]">
-                  <span className="font-poppins font-semibold text-[0.9] leading-[1.25rem]">
-                    Card Number
-                  </span>
-                  <div className="card-number-input w-[100%] border-b-2 border-[#D0D0D0] pb-[.2rem] px-1">
-                    <input
-                      placeholder="4480 0000 0000 0000"
-                      className="outline-none font-poppins text-[0.9rem] leading-[1.25rem]"
-                      type="number"
-                      required
-                    />
-                  </div>
+            <div className="parents-container flex flex-col py-[1rem]">
+              <div className="modal-credit-container flex flex-col justify-center items-center gap-[1rem] w-full py-[1.5rem] bg-[#FFFF] shadow-lg rounded-[1rem] -mt-2">
+                <div className="credit-card-img-container flex items-center justify-center gap-[0.75rem]">
+                  <img src={mastercard} alt="mastercard icon" width="35" />
+                  <img src={visa} alt="visa icon" width="35" />
+                  <img src={amex} alt="amex icon" width="35" />
+                  <img src={paypal} alt="paypal icon" width="35" />
                 </div>
 
-                <div className="card-holder-name-container flex flex-col gap-2 w-[100%]">
-                  <span className="font-poppins font-semibold text-[0.9] leading-[1.25rem]">
-                    Card Holder Name
-                  </span>
-                  <div className="card-holder-name-input w-[100%] border-b-2 border-[#D0D0D0] pb-[.2rem] px-1">
-                    <input
-                      placeholder="John Doe"
-                      className="outline-none font-poppins text-[0.9rem] leading-[1.25rem]"
-                      type="name"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="card-cvv-expiry_data-container flex w-[100%] gap-2">
-                  <div className="card-cvv-container flex flex-col gap-2 w-[50%]">
+                <div className="form-input-credit flex flex-col items-center gap-[1.5rem] w-[60%]">
+                  <div className="card-number-container flex flex-col gap-2 w-[100%]">
                     <span className="font-poppins font-semibold text-[0.9] leading-[1.25rem]">
-                      CVV
+                      Card Number
                     </span>
-                    <div className="card-holder-name-input w-[95%] border-b-2 border-[#D0D0D0] pb-[.2rem] px-1">
+                    <div className="card-number-input w-[100%] border-b-2 border-[#D0D0D0] pb-[.2rem] px-1">
                       <input
-                        placeholder="000"
-                        className="outline-none font-poppins text-[0.9rem] leading-[1.25rem]"
+                        placeholder="4480 0000 0000 0000"
+                        className="outline-none font-poppins text-[0.9rem] leading-[1.25rem] w-full"
                         type="number"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="card-expiry_date-container flex flex-col gap-2 w-[50%]">
+                  <div className="card-holder-name-container flex flex-col gap-2 w-[100%]">
                     <span className="font-poppins font-semibold text-[0.9] leading-[1.25rem]">
-                      Expiry Date
+                      Card Holder Name
                     </span>
-                    <div className="card-holder-name-input w-[95%] border-b-2 border-[#D0D0D0] pb-[.2rem] px-1">
+                    <div className="card-holder-name-input w-[100%] border-b-2 border-[#D0D0D0] pb-[.2rem] px-1">
                       <input
-                        placeholder="07/24"
-                        className="outline-none font-poppins text-[0.9rem] leading-[1.25rem]"
-                        type="number"
+                        placeholder="John Doe"
+                        className="outline-none font-poppins text-[0.9rem] leading-[1.25rem] w-full"
+                        type="name"
                         required
                       />
                     </div>
                   </div>
+
+                  <div className="card-cvv-expiry_data-container flex w-[100%] gap-2">
+                    <div className="card-cvv-container flex flex-col gap-2 w-[50%]">
+                      <span className="font-poppins font-semibold text-[0.9] leading-[1.25rem]">
+                        CVV
+                      </span>
+                      <div className="card-holder-name-input w-[95%] border-b-2 border-[#D0D0D0] pb-[.2rem] px-1">
+                        <input
+                          placeholder="000"
+                          className="outline-none font-poppins text-[0.9rem] leading-[1.25rem] w-full"
+                          type="number"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="card-expiry_date-container flex flex-col gap-2 w-[50%]">
+                      <span className="font-poppins font-semibold text-[0.9] leading-[1.25rem]">
+                        Expiry Date
+                      </span>
+                      <div className="card-holder-name-input w-[95%] border-b-2 border-[#D0D0D0] pb-[.2rem] px-1">
+                        <input
+                          placeholder="07/24"
+                          className="outline-none font-poppins text-[0.9rem] leading-[1.25rem] w-full"
+                          type="number"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    className="credit-card-btn flex justify-center items-center py-[1rem] rounded-[1.5rem] text-white bg-dark-blue w-full hover:bg-light-blue-300"
+                    onClick={() => {
+                      handlePayments();
+                      setPaymentMethod("Credit Card");
+                    }}
+                  >
+                    <span className="font-poppins text-[1rem] font-bold leading-[0.9rem]">
+                      Kirim
+                    </span>
+                  </button>
                 </div>
               </div>
             </div>

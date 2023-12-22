@@ -1,6 +1,6 @@
 const withMT = require("@material-tailwind/react/utils/withMT");
 
-module.exports = {
+module.exports = withMT({
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
@@ -9,7 +9,7 @@ module.exports = {
         poppins: ["Poppins", "sans"],
       },
       colors: {
-        "dark-blue": "#6148FF", 
+        "dark-blue": "#6148FF",
       },
     },
     screens: {
@@ -18,4 +18,4 @@ module.exports = {
     },
   },
   plugins: [],
-}
+});
