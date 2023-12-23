@@ -17,12 +17,14 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { getClasses } from "../../services/class/get-classByID";
 import ReactPlayer from "react-player";
 import { NavbarKelas } from "../../components/NavbarKelas";
+import { getAuthenticated } from "../../services/auth/get-authenticated";
 
 const DetailKelasPage = () => {
   const [MateriBelajar, setMateriBelajar] = useState(false);
   const [TentangKelas, setTentangKelas] = useState(true);
   const [PaymentModal, setPaymentModal] = useState(false);
   const [Detail, setDetail] = useState([]);
+  const [PaymentDetail, setPaymentDetail] = useState([]);
   const [CourseChapter, setCourseChapter] = useState([]);
   const [SelectedVideo, setSelectedVideo] = useState("");
   const [FirstVideoPlay, setFirstVideoPlay] = useState("");
@@ -43,7 +45,7 @@ const DetailKelasPage = () => {
       try {
         const response = await getClasses(classId);
         setDetail(response.data.data);
-        console.log(response.data.data, "classees");
+        // console.log(response.data.data, "classees");
       } catch (error) {
         console.error("Error mengambil data Kelas:", error);
       }
@@ -52,19 +54,30 @@ const DetailKelasPage = () => {
     const fetchClassesChapters = async () => {
       try {
         const response = await getClasses(classId);
-        setCourseChapter(response.data.data.chapters);
+        const sortedChapters = response.data.data.chapters.sort(
+          (a, b) => a.no_chapter - b.no_chapter
+        );
+        setCourseChapter(sortedChapters);
         setFirstVideoPlay(response.data.data.chapters[0].videos[0].link);
         // console.log(response.data.data.chapters, "chapters");
-        // console.log(response.data.data.chapters[0].videos[0].link, 'link');
+        console.log(response.data.data.chapters[0].videos[0], "videos status");
       } catch (error) {
         console.log(error, "error chapters");
       }
     };
 
+    const fetchPaymentsDetail = async () => {
+      const response = await getAuthenticated();
+      setPaymentDetail(response.data.data.payments);
+      console.log(response.data.data.payments, "detailPayments");
+      // console.log(PaymentDetail, 'usestate payment')
+    };
+
     fetchDetailClasses();
     fetchClassesChapters();
+    fetchPaymentsDetail();
     // console.log(SelectedVideo);
-  }, [classId, SelectedVideo]);
+  }, [classId]);
 
   const toogleTentangKelas = () => {
     setTentangKelas(true);
@@ -94,7 +107,7 @@ const DetailKelasPage = () => {
             icon={faArrowLeft}
             size="xl"
             onClick={() => {
-              navigate("/dummy");
+              navigate("/tesFilter");
             }}
           />
           <span
@@ -260,17 +273,16 @@ const DetailKelasPage = () => {
                 </div>
               </div>
             </div>
-            {/* {renderChapters()} */}
-            {/* <Link to={`/pembayaran/${classId}`}>
-              <button className="bg-dark-blue my-[2rem] rounded-md flex items-center justify-center font-montserrat font-bold px-[2rem] py-[1rem] hover:text-white">
-                Payment
-              </button>
-            </Link> */}
 
             {CourseChapter.map((value, chapterIndex) => {
               const isPremiumClass = Detail.type_id === 2;
-              const isChapterUnlocked = chapterIndex === 0 || !isPremiumClass;
 
+              const isChapterUnlocked =
+                (value.id ===
+                  PaymentDetail.find((payment) => payment.class_id === value.id)
+                    ?.class_id ||
+                  CourseChapter[0]?.id) &&
+                PaymentDetail.some((payment) => payment.is_paid);
               return (
                 <div className="chapter-parents my-[.5rem]" key={chapterIndex}>
                   <div className="title-chapter-section flex justify-between items-center">
@@ -281,66 +293,80 @@ const DetailKelasPage = () => {
                       60 Menit
                     </span>
                   </div>
-                  {value.videos.map((vids, videoIndex) => {
-                    totalVideosDesktop++;
-                    const adjustedVideoIndex = totalVideosDesktop;
+                  {value.videos
+                    .sort((a, b) => a.no_video - b.no_video)
+                    .map((vids, videoIndex) => {
+                      totalVideosDesktop++;
+                      const adjustedVideoIndex = totalVideosDesktop;
 
-                    return (
-                      <div
-                        className="course-chapters-container border-b border-[#EBF3FC] py-[0.5rem]"
-                        key={videoIndex}
-                      >
-                        <div className="chapter-card-section flex items-center justify-between w-[95%]">
-                          <div className="card-number-title-section flex items-center gap-[0.75rem]">
-                            <span
-                              className={`rounded-[100%] px-[1rem] py-[.5rem] hover:bg-dark-blue hover:text-white cursor-pointer bg-[#EBF3FC]`}
-                            >
-                              {adjustedVideoIndex}
-                            </span>
-                            <span
-                              className={`font-montserrat font-semibold text-[0.9rem] text-[rgba(0,0,0,0.80)] leading-[1.25rem]`}
-                            >
-                              {vids.title}
-                            </span>
+                      return (
+                        <div
+                          className="course-chapters-container border-b border-[#EBF3FC] py-[0.5rem]"
+                          key={videoIndex}
+                        >
+                          <div className="chapter-card-section flex items-center justify-between w-[95%]">
+                            <div className="card-number-title-section flex items-center gap-[0.75rem]">
+                              <span
+                                className={`rounded-[100%] px-[1rem] py-[.5rem] hover:bg-dark-blue hover:text-white cursor-pointer bg-[#EBF3FC]`}
+                              >
+                                {adjustedVideoIndex}
+                              </span>
+                              <span
+                                className={`font-montserrat font-semibold text-[0.9rem] text-[rgba(0,0,0,0.80)] leading-[1.25rem]`}
+                              >
+                                {vids.title}
+                              </span>
+                            </div>
+                            {vids.watch_status.map((watched, watchedIndex) => {
+                              return (
+                                <div key={watchedIndex}>
+                                  {isPremiumClass ? (
+                                    <img
+                                      src={
+                                        isChapterUnlocked
+                                          ? watched.is_watched
+                                            ? done_play_button
+                                            : undone_play_button
+                                          : locked
+                                      }
+                                      alt={
+                                        isChapterUnlocked
+                                          ? "play-button"
+                                          : "locked-button"
+                                      }
+                                      width="20"
+                                      className="cursor-pointer"
+                                      onClick={() => {
+                                        if (isChapterUnlocked) {
+                                          setSelectedVideo(vids.link);
+                                          setisVideoClicked(true);
+                                        } else {
+                                          tooglePayment();
+                                        }
+                                      }}
+                                    />
+                                  ) : (
+                                    <img
+                                      src={undone_play_button}
+                                      alt="play-undone-button"
+                                      width="20"
+                                      className="cursor-pointer"
+                                      onClick={() => {
+                                        setSelectedVideo(vids.link);
+                                        setisVideoClicked(true);
+                                      }}
+                                    />
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
-                          {!isChapterUnlocked && isPremiumClass ? (
-                            <img
-                              src={locked}
-                              alt="locked-button"
-                              width="20"
-                              onClick={tooglePayment}
-                              className="cursor-pointer"
-                            />
-                          ) : (
-                            <img
-                              src={
-                                isChapterUnlocked
-                                  ? vids.is_watched
-                                    ? done_play_button
-                                    : undone_play_button
-                                  : locked
-                              }
-                              alt={
-                                isChapterUnlocked
-                                  ? "play-button"
-                                  : "locked-button"
-                              }
-                              width="20"
-                              className="cursor-pointer"
-                              onClick={() => {
-                                setSelectedVideo(vids.link);
-                                setisVideoClicked(true);
-                              }}
-                            />
-                          )}
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
               );
             })}
-
             {PaymentModal && (
               <>
                 <div className="modal-payment-popup fixed bg-black bg-opacity-70 inset-0 font-montserrat cursor-pointer">
