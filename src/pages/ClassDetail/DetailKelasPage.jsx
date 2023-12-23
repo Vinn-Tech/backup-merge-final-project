@@ -100,7 +100,7 @@ const DetailKelasPage = () => {
           <span
             className="font-montserrat text-[1rem] font-bold leading-[1.5rem]"
             onClick={() => {
-              navigate("/dummy");
+              navigate("/tesFilter");
             }}
           >
             Kelas Lainnya

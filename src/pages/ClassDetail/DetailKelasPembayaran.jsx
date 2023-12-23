@@ -16,6 +16,7 @@ import arrow_buy from "../../assets/img/icon/carbon_next-filled.svg";
 import { getClasses } from "../../services/class/get-classByID";
 import { Option, Select } from "@material-tailwind/react";
 import { postPayments } from "../../services/payments/create-payments";
+import { updatePayment } from "../../services/payments/update-payments";
 
 const DetailKelasPembayaran = () => {
   const [BankAccordionOpen, setBankAccordionOpen] = useState(false);
@@ -30,7 +31,6 @@ const DetailKelasPembayaran = () => {
   const [SelectedBank, setSelectedBank] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("");
   const navigate = useNavigate();
-  // const background_uiux = require("../../assets/img/image/uiux-person.jpg");
   const { classId } = useParams();
 
   const rupiahFormat = new Intl.NumberFormat("id-ID", {
@@ -66,10 +66,9 @@ const DetailKelasPembayaran = () => {
 
   const handleInputNominal = (e) => {
     const { value } = e.target;
-    const nominalValue = parseInt(value.replace(/\D/g, ""), 10);
     setFormInputNominal({
       ...FormInputNominal,
-      nominal: nominalValue,
+      nominal: value,
     });
     const totalAmount = Detail.price + taxPrice;
     const isInputValid = Number(value) === totalAmount;
@@ -92,18 +91,29 @@ const DetailKelasPembayaran = () => {
     setSelectedBank(value);
   };
 
-  const handlePayments = async () => {
-    const formPayments = {
-      payment_method: paymentMethod,
-      class_id: classId,
-    };
-    try {
-      const response = await postPayments(formPayments);
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const handlePayments = async () => {
+  //   const selectedPaymentMethod = paymentMethod; // Ambil nilai terkini
+  //   if (
+  //     selectedPaymentMethod === "Bank" ||
+  //     selectedPaymentMethod === "Credit Card"
+  //   ) {
+  //     const formPayments = {
+  //       payment_method: selectedPaymentMethod,
+  //       class_id: classId,
+  //     };
+  //     try {
+  //       const response = await postPayments(formPayments);
+  //       console.log(TestMethod, "testMethod");
+  //       console.log(response);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   } else {
+  //     console.error(
+  //       "Pilih metode pembayaran yang valid (Bank Transfer atau Credit Card)"
+  //     );
+  //   }
+  // };
 
   useEffect(() => {
     const fetchDetailClasses = async () => {
@@ -115,12 +125,65 @@ const DetailKelasPembayaran = () => {
         console.error("Error mengambil data Kelas:", error);
       }
     };
+    
+    // const fetchPaymentPaid = async () => {
+    //   try {
+    //     const response = await updatePayment(classId);
+    //     console.log(response)
+    //   } catch (error) {
+        
+    //   }
+    // }
 
     fetchDetailClasses();
   }, [classId]);
 
+  useEffect(() => {
+    const handlePayments = async () => {
+      if (
+        paymentMethod === "Bank Transfer" ||
+        paymentMethod === "Credit Card"
+      ) {
+        const formPayments = {
+          payment_method: paymentMethod,
+          class_id: classId,
+        };
+        try {
+          const response = await postPayments(formPayments);
+          console.log(response);
+        } catch (error) {
+          console.log(error);
+        }
+      } else {
+        console.error(
+          "Pilih metode pembayaran yang valid (Bank Transfer atau Credit Card)"
+        );
+      }
+    };
+
+    handlePayments();
+  }, [paymentMethod, classId]);
+
   const taxPrice = (Detail.price * 11) / 100;
-  // const isNominalValid = (FormInputNominal.nominal >= Detail.price + taxPrice);
+
+  const handleBankTransferClick = () => {
+    const selectedMethod = "Bank Transfer";
+    setPaymentMethod(selectedMethod);
+  };
+
+  const handleCreditCardClick = () => {
+    const selectedMethod = "Credit Card";
+    setPaymentMethod(selectedMethod);
+  };
+
+  const handleUpdatePayment = async (id) => {
+  try {
+    const response = await updatePayment(id);
+    console.log(response, 'paid payment');
+  } catch (error) {
+    console.error("Error updating payment:", error);
+  }
+};
 
   return (
     <div className="parents">
@@ -236,11 +299,12 @@ const DetailKelasPembayaran = () => {
               </div>
               <button
                 className="bank-transfer-btn flex justify-center items-center py-[1rem] rounded-[1.5rem] text-white bg-[#3C3C3C] w-[50%] hover:bg-black disabled:bg-gray-300"
-                onClick={() => {
-                  handlePayments();
-                  setPaymentMethod("Bank Transfer");
-                }}
-                disabled={FormInputNominal.nominal <= 0 || !isNominalValid || !isNominalLengthValid }
+                onClick={handleBankTransferClick}
+                disabled={
+                  FormInputNominal.nominal <= 0 ||
+                  !isNominalValid ||
+                  !isNominalLengthValid
+                }
               >
                 <span className="font-poppins text-[1rem] font-bold leading-[0.9rem]">
                   Kirim
@@ -332,10 +396,7 @@ const DetailKelasPembayaran = () => {
                   </div>
                   <button
                     className="credit-card-btn flex justify-center items-center py-[1rem] rounded-[1.5rem] text-white bg-dark-blue w-full hover:bg-light-blue-300"
-                    onClick={() => {
-                      handlePayments();
-                      setPaymentMethod("Credit Card");
-                    }}
+                    onClick={handleCreditCardClick}
                   >
                     <span className="font-poppins text-[1rem] font-bold leading-[0.9rem]">
                       Kirim
@@ -414,7 +475,8 @@ const DetailKelasPembayaran = () => {
           <button
             className="buy-now-btn flex items-center justify-center rounded-[1.5rem] px-[1rem] py-[.75rem] bg-[#F00] gap-2 mt-[1.5rem] mb-[0.75rem]"
             onClick={() => {
-              navigate("/pembayaranSukses");
+              // navigate("/pembayaranSukses");
+              handleUpdatePayment(classId);
             }}
           >
             <span className="font-montserrat font-black text-white text-[1rem] leading-[1.5rem]">

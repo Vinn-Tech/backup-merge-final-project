@@ -4,4 +4,5 @@ export const API_ENDPOINT = {
   RESET_PASSWORD: "api/auth/reset-password",
   CLASSES: "api/classes",
   PAYMENTS: "api/payments",
+  UPDATE_PAYMENTS: "api/payments/paid/"
 };
