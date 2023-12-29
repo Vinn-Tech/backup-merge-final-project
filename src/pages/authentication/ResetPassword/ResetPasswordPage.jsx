@@ -6,6 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import logo from "../../../assets/img/logo.png";
 import { postReset } from "../../../services/auth/reset-password";
@@ -15,14 +16,13 @@ const ERROR_BORDER_COLOR = "border-red-600 focus:outline-red-600";
 const SUCCESS_BORDER_COLOR = "border-green-600 focus:outline-green-600";
 
 const ResetPasswordPage = () => {
+  const navigate = useNavigate();
   const [FormInput, setFormInput] = useState(
     {
       password: "",
       confirmPassword: "",
     }
   )
-  // const [Password, setPassword] = useState("");
-  // const [ConfirmPassword, setConfirmPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [ConfirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
@@ -80,6 +80,7 @@ const ResetPasswordPage = () => {
         progress: undefined,
         theme: "light",
       });
+      navigate("/login");
     } catch (error) {
       toast.error(error.response.data.error, {
         position: "bottom-center",
@@ -91,7 +92,6 @@ const ResetPasswordPage = () => {
         progress: undefined,
         theme: "light",
       });
-      console.log(error, "err reset")
     }
   }  
 

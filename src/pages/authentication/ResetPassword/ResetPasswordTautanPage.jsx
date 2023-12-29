@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import logo from "../../../assets/img/logo.png";
 import { postForgotPassword } from "../../../services/auth/forgot-password";
@@ -13,12 +12,10 @@ const ResetPasswordTautanPage = () => {
       email: ""
     }
   )
-  // const [Email, setEmail] = useState("");
   const isEmailValid = EMAIL_REGEX.test(FormInput.email);
   const isEmailLengthValid = FormInput.email.length > 0;
   const ERROR_BORDER_COLOR = "border-red-600 focus:outline-red-600";
   const SUCCESS_BORDER_COLOR = "border-green-600 focus:outline-green-600";
-  // const navigate = useNavigate()
   
   const emailBorderClass = () => {
     if (isEmailLengthValid > 0 && !isEmailValid) {
@@ -52,10 +49,7 @@ const ResetPasswordTautanPage = () => {
         progress: undefined,
         theme: "light",
       });
-      console.log(response.data.data.token)
-      console.log('sukses')
       CookieStorage.set(CookieKeys.ForgotPasswordToken, response.data.data.token)
-      // navigate("/login");
     } catch (error) {
       toast.error(error.response.data.error, {
         position: "bottom-center",
@@ -103,7 +97,6 @@ const ResetPasswordTautanPage = () => {
               className="reset-btn font-poppins text-white bg-blue-700 rounded-[1rem] py-[0.75rem] px-[1.5rem] text-[1rem] disabled:cursor-not-allowed disabled:bg-blue-300"
               disabled={!isEmailLengthValid || !isEmailValid}
               onClick={()=>{
-                console.log('hello')
                 handleForgotPassword();
               }}
             >

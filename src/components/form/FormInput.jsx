@@ -5,7 +5,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-
 const FormInput = ({
   label,
   type,
@@ -15,7 +14,8 @@ const FormInput = ({
   onChange,
   isValid,
   isIconValid,
-  isPassword,
+  classNameInput,
+  classNameLabel,
 }) => {
   const inputClassName = () => {
     if (isValid === true) {
@@ -49,7 +49,7 @@ const FormInput = ({
 
   return (
     <div className="flex flex-col">
-      <label htmlFor={label} className="py-2 text-xs">
+      <label htmlFor={label} className={`py-2 text-xs ${classNameLabel}`}>
         {name}
       </label>
       <div className="relative">
@@ -61,7 +61,7 @@ const FormInput = ({
           name={name}
           value={value}
           onChange={onChange}
-          className={`w-full h-12 rounded-xl px-5 border-2 ${inputClassName()}`}
+          className={`w-full h-12 rounded-xl px-5 border-2 ${inputClassName()} ${classNameInput}`}
           required
         />
       </div>

@@ -1,45 +1,47 @@
-import React from "react";
-import logo from "../assets/img/logo.png";
-// import { useParams } from "react-router-dom";
-// import { API_ENDPOINT } from "../utils/api-endpoint";
-// import http from "../utils/http";
+
+import React, { useEffect, useState } from "react";
+import { kategori } from "../services/general/kategori";
+import { Link } from "react-router-dom";
 
 export const KategoriBelajar = () => {
-//   const [kategoriBelajar, setKategoriBelajar] = useState([])
-//   const ktg = useParams()
+  const [dataKategori, setDataKategori] = useState([]);
 
-//   const handleKategori = async () => {
-//     try{
-//     const response = await http.get(
-//       API_ENDPOINT.KATEGORI(ktg.id)
-//     )
-//     setKategoriBelajar(response.data.data)
-//     console.log(response.data.data)
-//   } catch (error){
-//     console.error("Error fetching kategori:", error);
-//   }
-// }
-   
+  const fetchKategori = async () => {
+    try {
+      const response = await kategori();
+      setDataKategori(response.data.data);     
+    } catch (error) {
+      console.error("Error fetching kategori:", error);
+    }
+  };
 
-//     useEffect(() => {
-//       handleKategori()
-//     },[ktg.id])
+  useEffect(() => {
+    fetchKategori();
+  }, []); 
 
   return (
-    <div className="bg-[#EBF3FC] ">
-      <div className="px-4 laptop:mx-[6rem] ">
-        <h1 className="hidden laptop:flex laptop:font-semibold laptop:text-md laptop:text-xl laptop:py-1">Kategori Belajar</h1>
-        <h1 className="font-semibold text-md text-xl py-1 laptop:hidden">Kategori</h1>
-        <div className="flex flex-col w-[10rem] flex-wrap mb-1">
-          {/* {kategoriBelajar.map((item) => (
-             <div key={item.id}> */}
-          {/* <div className="rounded-3xl mb-1  w-full h-[6rem]">{item.image}</div> */}
-          <img className="rounded-3xl mb-1  w-full h-[6rem]" src={logo} alt=''/>
-          <h2 className=" text-center">RealSkills</h2>
+    <>
+      <div className=" laptop:mx-[6rem] laptop:px-0">
+        <h1 className="hidden laptop:flex laptop:font-semibold laptop:text-md laptop:text-xl laptop:pt-1">
+          Kategori Belajar
+        </h1>
+        <div className="flex justify-between gap-4">          
+        {dataKategori.map((value) => (
+          <div key={value.id} >
+             <Link to={`/kategori/${value.id}`}>
+              <div className="rounded-3xl my-3 w-[14rem] h-[13rem] bg-[#3730a3] laptop:w-[10rem] laptop:h-[8rem] laptop:bg-[#EBF3FC] laptop:my-1">
+                <img
+                  className="flex rounded-3xl mb-1 w-[14rem] h-[11rem] laptop:w-[10rem] laptop:h-[6rem]"
+                  src={value.image}
+                  alt={value.name}
+                />{" "}
+                <h2 className=" text-center mb-1 text-white laptop:text-black" ><hr/>{value.name}</h2>
+              </div>
+              </Link>
           </div>
-          {/* ))} */}
-          </div>
+            ))}
+        </div>
       </div>
-    // </div>
+    </>
   );
 };

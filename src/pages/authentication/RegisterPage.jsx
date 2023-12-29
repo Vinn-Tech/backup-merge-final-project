@@ -98,7 +98,7 @@ export const RegisterPage = () => {
       });
       navigate("/login");
     } catch (error) {
-      toast.error("error.response.data.error.detail", {
+      toast.error(error.response.data.error.detail, {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: false,
@@ -108,18 +108,8 @@ export const RegisterPage = () => {
         progress: undefined,
         theme: "light",
       });
-      console.log(error)
     }
   };
-
-  // const registerUser = () => {
-  //   register({
-  //     name : nama,
-  //     email : email,
-  //     password : password,
-  //     phone_number : noTelp,
-  //   })
-  // }
 
   return (
     <div className="flex laptop:flex-row laptop:justify-between font-poppins">

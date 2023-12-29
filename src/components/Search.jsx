@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Drawer,
   Button,
@@ -11,18 +11,48 @@ import {
   Chip,
 } from "@material-tailwind/react";
 import logo from "../assets/img/logo.png";
-
+import { useNavigate } from "react-router-dom";
+import { fetchSearch } from "../services/search";
+ 
 export const Search = () => {
   const [open, setOpen] = React.useState(false);
-  const openDrawer = () => setOpen(true);
-  const closeDrawer = () => setOpen(false);
-
+  // const openDrawer = () => setOpen(true);
+  // const closeDrawer = () => setOpen(false);
+  const [search, setSearch] = useState("");
+  const [searchData, setSearchData] = useState("");
+  const navigate = useNavigate();
+ 
+ 
+ 
+const handleSearch = async () => {
+  try {
+    const dataSearch = await fetchSearch(search);
+    setSearchData(dataSearch);
+  } catch (error) {
+    console.error(error);
+  }
+};
+ 
+ 
+useEffect(() => {
+      if (searchData) {
+        navigate('/search?query=' + search, { state: { results: searchData.classes, query: search} });
+ 
+      }
+  },[searchData, search])
+ 
+ 
+  const enter = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+ 
   return (
     <div className="flex justify-between items-center py-4 px-4 bg-[#EBF3FC] gap-6 laptop:hidden">
-      
-      <div className="w-2/12">
-        <React.Fragment>
-          <Button className="bg-[#6148FF] shadow-lg" onClick={openDrawer}>
+ 
+      <React.Fragment>
+          <Button className="bg-[#6148FF] shadow-lg" onClick={() => setOpen(true)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="26"
@@ -33,48 +63,48 @@ export const Search = () => {
               <path
                 d="M8 18H21"
                 stroke="white"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <path
                 d="M3 18H3.01"
                 stroke="white"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <path
                 d="M8 12H21"
                 stroke="white"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <path
                 d="M3 12H3.01"
                 stroke="white"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <path
                 d="M8 6H21"
                 stroke="white"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
               <path
                 d="M3 6H3.01"
                 stroke="white"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </Button>
-          <Drawer open={open} onClose={closeDrawer}>
+          <Drawer open={open}  onClose={() => setOpen(false)}>
             <div className="mb-2 flex items-center justify-between p-4">
               <Typography variant="h5" color="blue-gray">
                 <div className="flex  items-center gap-2">
@@ -85,7 +115,7 @@ export const Search = () => {
               <IconButton
                 variant="text"
                 color="blue-gray"
-                onClick={closeDrawer}
+                onClick={() => setOpen(false)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -141,7 +171,7 @@ export const Search = () => {
                   <Chip
                     value="5"
                     size="sm"
-                    color="#6148F"
+                    color="gray"
                     className="rounded-full"
                   />
                 </ListItemSuffix>
@@ -200,13 +230,17 @@ export const Search = () => {
             </List>
           </Drawer>
         </React.Fragment>
-      </div>
       <div className="flex relative w-10/12 ">
         <input
-          className="p-4 flex justify-between rounded-lg shadow-lg w-full "
+          className="p-4 flex justify-between rounded-lg shadow-lg w-full text-[#6148FF]"
           placeholder="Cari Kursus terbaik...."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        onKeyDown={enter}
         />
-        <button className=" bg-[#6148FF] absolute right-3 mt-3 rounded-md">
+        <button 
+        onClick={handleSearch}
+        className=" bg-[#6148FF] absolute right-3 mt-3 rounded-md">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="28"
@@ -225,9 +259,8 @@ export const Search = () => {
             />
           </svg>
         </button>
-      </div>
-
-      
+      </div>   
     </div>
   );
 };
+ 

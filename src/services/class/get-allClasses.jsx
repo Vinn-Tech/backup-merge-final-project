@@ -7,7 +7,7 @@ export const getAllClass = async () => {
 };
 
 
-export const getFilterClasses = async ({page, limit, category, type, level}) => {
+export const getFilterClasses = async ({category, type, level}) => {
   const params = {
     category,
     type,

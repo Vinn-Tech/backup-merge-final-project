@@ -5,3 +5,4 @@ export const postRegister = async (input) => {
   const registerUser = await http.post(API_ENDPOINT.REGISTER_PAGE, input);
   return registerUser;
 };
+
